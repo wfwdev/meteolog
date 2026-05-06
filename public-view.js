@@ -82,10 +82,17 @@ async function doRender(container, locationId) {
 }
 
 function headerHTML(name, desc, icon) {
-  return `<div style="text-align:center;margin-bottom:20px;padding-top:8px;">
-    <div style="font-size:52px;margin-bottom:8px;">${icon||'📍'}</div>
-    <div style="font-family:var(--font-display);font-size:26px;font-weight:800;">${name}</div>
-    ${desc ? `<div style="font-size:14px;color:var(--text-secondary);margin-top:4px;">${desc}</div>` : ''}
+  return `<div style="
+    display:flex; align-items:center; gap:14px;
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:14px 16px;
+    margin-bottom:16px;
+  ">
+    <div style="font-size:40px;line-height:1;flex-shrink:0;">${icon||'📍'}</div>
+    <div style="min-width:0;">
+      <div style="font-family:var(--font-display);font-size:20px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+      ${desc ? `<div style="font-size:13px;color:var(--text-secondary);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${desc}</div>` : ''}
+    </div>
   </div>`;
 }
 
