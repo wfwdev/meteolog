@@ -304,7 +304,8 @@ function showAccountMenu() {
     <div class="ap-name">${name}</div>
     <div class="ap-sub">${guest ? '👤 Vendég fiók' : '✉️ Regisztrált felhasználó'}</div>
     ${guest ? `<button class="ap-btn" id="ap-register">📧 Regisztráció</button>` : ''}
-    <button class="ap-btn" id="ap-reminder">🔔 Napi emlékeztető</button>
+    <button class="ap-btn" id="ap-help">📖 Használati útmutató</button>
+    <button class="ap-btn" id="ap-install">📱 Telepítési útmutató</button>
     <button class="ap-btn" id="ap-logout" style="color:var(--red);">🚪 Kijelentkezés</button>`;
 
   document.body.appendChild(popup);
@@ -314,10 +315,16 @@ function showAccountMenu() {
     await logout();
   });
 
-  popup.querySelector('#ap-reminder')?.addEventListener('click', () => {
+  popup.querySelector('#ap-help')?.addEventListener('click', () => {
     popup.remove();
-    showReminderModal();
+    showHelpModal();
   });
+
+  popup.querySelector('#ap-install')?.addEventListener('click', () => {
+    popup.remove();
+    showInstallModal();
+  });
+
   popup.querySelector('#ap-register')?.addEventListener('click', () => {
     popup.remove();
     document.getElementById('auth-modal').classList.remove('hidden');
@@ -332,140 +339,120 @@ function showAccountMenu() {
   }), 50);
 }
 
-// ── Emlékeztető modal (FCM Web Push) ─────────────────────────
-async function showReminderModal() {
-  const fb  = window.__firebase;
-  const uid = fb.auth.currentUser?.uid;
-  const isAnon = fb.auth.currentUser?.isAnonymous;
-
-  // Vendég fiókhoz nem engedélyezett
-  if (!uid || isAnon) {
-    showToast('Az emlékeztetőhöz be kell jelentkezned!', 'error');
-    return;
-  }
-
-  // Aktuális beállítás betöltése
-  let settings = { enabled: false, hour: 8, minute: 0 };
-  try {
-    const { getReminderFromFirestore } = await import('./push-subscribe.js');
-    settings = await getReminderFromFirestore(fb.db, uid);
-  } catch(e) {}
-
-  const perm = Notification.permission ?? 'default';
-
+// ── Útmutató modal ────────────────────────────────────────────
+function showHelpModal() {
   const modal = document.createElement('div');
-  modal.className = 'modal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;overflow-y:auto;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:16px;';
   modal.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:28px 24px;width:100%;max-width:400px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-        <span style="font-size:28px;">🔔</span>
-        <span style="font-family:var(--font-display);font-weight:700;font-size:20px;">Napi emlékeztető</span>
+    <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);width:100%;max-width:420px;overflow:hidden;margin:auto;">
+      <div style="background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;">📖</span>
+        <span style="font-family:var(--font-display);font-weight:700;font-size:18px;">Használati útmutató</span>
+        <button id="help-close" style="margin-left:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;color:var(--text-secondary);cursor:pointer;font-size:14px;">✕</button>
       </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:18px;">
 
-      ${perm === 'denied' ? `
-        <div class="auth-error" style="display:block;margin-bottom:16px;">
-          ⚠️ Az értesítések le vannak tiltva.<br>
-          Beállítások → Safari → Értesítések → MeteoLog → Engedélyezés
-        </div>` : ''}
-
-      <div style="margin-bottom:20px;">
-        <div class="toggle-row">
-          <span style="font-size:15px;font-weight:500;">Emlékeztető bekapcsolása</span>
-          <div class="toggle ${settings.enabled ? 'on' : ''}" id="rem-toggle"></div>
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;margin-bottom:8px;">📍 1. Helyszín hozzáadása</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">Nyisd meg a <b style="color:var(--text-primary);">Helyszínek</b> fület (térképtű ikon). Kattints a <b style="color:var(--text-primary);">+ Új helyszín hozzáadása</b> gombra. Add meg a nevet, válassz ikont, és opcionálisan add meg a GPS koordinátákat az Open-Meteo integrációhoz. Ha nyilvánossá teszed, megosztható linket kapsz.</div>
         </div>
-        <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.5;">
-          Naponta értesítést küld a beállított időpontban – akkor is ha az app zárva van.
-          ${perm === 'granted' ? '✅ Értesítések engedélyezve.' : ''}
-        </p>
-      </div>
 
-      <div id="rem-time-section" style="${settings.enabled ? '' : 'opacity:0.4;pointer-events:none;'}transition:opacity 0.2s;">
-        <div class="input-label" style="margin-bottom:10px;text-align:center;">⏰ Értesítés időpontja</div>
-        <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
-          <div class="stepper" style="max-width:140px;">
-            <button class="stepper-btn" id="rem-hour-dec">−</button>
-            <div class="stepper-value" id="rem-hour-val">${String(settings.hour).padStart(2,'0')}<span class="stepper-unit">ó</span></div>
-            <button class="stepper-btn" id="rem-hour-inc">+</button>
-          </div>
-          <span style="font-size:28px;color:var(--accent);font-weight:700;line-height:1;">:</span>
-          <div class="stepper" style="max-width:140px;">
-            <button class="stepper-btn" id="rem-min-dec">−</button>
-            <div class="stepper-value" id="rem-min-val">${String(settings.minute).padStart(2,'0')}<span class="stepper-unit">p</span></div>
-            <button class="stepper-btn" id="rem-min-inc">+</button>
-          </div>
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;margin-bottom:8px;">🌡️ 2. Időjárás rögzítése</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">Nyomd meg a <b style="color:var(--accent);">+ zöld gombot</b> az alján. Válaszd ki az időjárás típusát, állítsd be a hőmérsékletet és más mért értékeket. A ki/be kapcsolókkal döntöd el melyik mezőt töltöd ki. A végén nyomd meg a <b style="color:var(--text-primary);">Mentés</b> gombot.</div>
         </div>
-      </div>
 
-      <div id="rem-status" style="font-size:13px;color:var(--text-secondary);text-align:center;min-height:20px;margin-bottom:14px;"></div>
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;margin-bottom:8px;">📅 3. Előzmények megtekintése</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">A <b style="color:var(--text-primary);">Előzmény</b> fülön naptár nézetben látod az összes bejegyzést. A zöld emoji jelzi azokat a napokat ahol van adat. Kattints egy napra a részletek megtekintéséhez. A kuka ikonnal törölhetsz bejegyzést.</div>
+        </div>
 
-      <div style="display:flex;gap:10px;">
-        <button class="btn btn-ghost" id="rem-cancel">Mégse</button>
-        <button class="btn btn-primary" id="rem-save">💾 Mentés</button>
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;margin-bottom:8px;">📊 4. Grafikonok és export</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">A <b style="color:var(--text-primary);">Grafikonok</b> fülön hőmérséklet és csapadék grafikonokat, valamint statisztikákat látsz. Az időszakot (7/30/90/365 nap) a gombok segítségével válthatod. Az oldal alján lévő <b style="color:var(--text-primary);">CSV letöltés</b> gombbal Excelbe exportálhatod az adatokat.</div>
+        </div>
+
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;margin-bottom:8px;">🌐 5. Publikus megosztás</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">Ha egy helyszínt nyilvánosra állítasz, megjelenik mellette a <b style="color:var(--text-primary);">🌐 Megnyitás</b> és <b style="color:var(--text-primary);">🔗 Megosztás</b> gomb. A nyilvános oldalon az Open-Meteo hivatalos adata és a te saját méréseid jelennek meg egymás mellett.</div>
+        </div>
+
       </div>
     </div>`;
-
   document.body.appendChild(modal);
+  modal.querySelector('#help-close').onclick = () => modal.remove();
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+}
 
-  let hour    = settings.hour;
-  let minute  = settings.minute;
-  let enabled = settings.enabled;
+// ── PWA telepítési útmutató ───────────────────────────────────
+function showInstallModal() {
+  const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
 
-  const setStatus = (msg, color = 'var(--text-secondary)') => {
-    const el = modal.querySelector('#rem-status');
-    if (el) { el.textContent = msg; el.style.color = color; }
-  };
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;overflow-y:auto;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);width:100%;max-width:420px;overflow:hidden;margin:auto;">
+      <div style="background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;">📱</span>
+        <span style="font-family:var(--font-display);font-weight:700;font-size:18px;">Telepítési útmutató</span>
+        <button id="install-close" style="margin-left:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;color:var(--text-secondary);cursor:pointer;font-size:14px;">✕</button>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
 
-  modal.querySelector('#rem-toggle').addEventListener('click', () => {
-    enabled = !enabled;
-    modal.querySelector('#rem-toggle').classList.toggle('on', enabled);
-    const ts = modal.querySelector('#rem-time-section');
-    ts.style.opacity = enabled ? '1' : '0.4';
-    ts.style.pointerEvents = enabled ? 'auto' : 'none';
-  });
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+          A MeteoLog PWA (Progressive Web App) – telepítheted a kezdőképernyőre mint egy normál alkalmazást. Nincs App Store, nincs telepítési folyamat.
+        </p>
 
-  modal.querySelector('#rem-hour-dec').addEventListener('click', () => {
-    hour = (hour - 1 + 24) % 24;
-    modal.querySelector('#rem-hour-val').innerHTML = String(hour).padStart(2,'0') + '<span class="stepper-unit">ó</span>';
-  });
-  modal.querySelector('#rem-hour-inc').addEventListener('click', () => {
-    hour = (hour + 1) % 24;
-    modal.querySelector('#rem-hour-val').innerHTML = String(hour).padStart(2,'0') + '<span class="stepper-unit">ó</span>';
-  });
-  modal.querySelector('#rem-min-dec').addEventListener('click', () => {
-    minute = (minute - 5 + 60) % 60;
-    modal.querySelector('#rem-min-val').innerHTML = String(minute).padStart(2,'0') + '<span class="stepper-unit">p</span>';
-  });
-  modal.querySelector('#rem-min-inc').addEventListener('click', () => {
-    minute = (minute + 5) % 60;
-    modal.querySelector('#rem-min-val').innerHTML = String(minute).padStart(2,'0') + '<span class="stepper-unit">p</span>';
-  });
+        ${isIOS ? `
+        <div style="background:var(--accent-dim);border:1px solid var(--accent);border-radius:var(--radius);padding:14px;">
+          <div style="font-weight:700;font-size:13px;color:var(--accent);margin-bottom:4px;">✅ iPhone / iPad észlelve</div>
+          <div style="font-size:12px;color:var(--text-secondary);">Az alábbi iOS lépések vonatkoznak rád.</div>
+        </div>` : isAndroid ? `
+        <div style="background:var(--accent-dim);border:1px solid var(--accent);border-radius:var(--radius);padding:14px;">
+          <div style="font-weight:700;font-size:13px;color:var(--accent);margin-bottom:4px;">✅ Android eszköz észlelve</div>
+          <div style="font-size:12px;color:var(--text-secondary);">Az alábbi Android lépések vonatkoznak rád.</div>
+        </div>` : ''}
 
-  modal.querySelector('#rem-cancel').addEventListener('click', () => modal.remove());
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;margin-bottom:10px;">🍎 iPhone / iPad (Safari)</div>
+          ${['Nyisd meg az oldalt <b>Safari</b> böngészőben',
+             'Koppints a <b>Megosztás ikonra</b> (négyzet felfelé mutató nyíllal) – az oldalsáv alján',
+             'Görgess le és koppints: <b>"Hozzáadás a kezdőképernyőhöz"</b>',
+             'Add meg a nevet (pl. MeteoLog) → <b>Hozzáadás</b>',
+             'Az app megjelenik a kezdőképernyőn – mostantól úgy nyílik mint egy natív app!'].map((s,i) =>
+            `<div style="display:flex;gap:10px;margin-bottom:8px;">
+              <div style="background:var(--accent);color:#000;font-weight:700;font-size:12px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${i+1}</div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;">${s}</div>
+            </div>`).join('')}
+        </div>
 
-  modal.querySelector('#rem-save').addEventListener('click', async () => {
-    const saveBtn = modal.querySelector('#rem-save');
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'Mentés...';
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;margin-bottom:10px;">🤖 Android (Chrome)</div>
+          ${['Nyisd meg az oldalt <b>Chrome</b> böngészőben',
+             'Koppints a <b>⋮ menüre</b> (jobb felső sarok)',
+             'Válaszd: <b>"Hozzáadás a kezdőképernyőhöz"</b> vagy <b>"Alkalmazás telepítése"</b>',
+             'Erősítsd meg → <b>Hozzáadás</b>',
+             'Az app megjelenik a kezdőképernyőn!'].map((s,i) =>
+            `<div style="display:flex;gap:10px;margin-bottom:8px;">
+              <div style="background:var(--accent);color:#000;font-weight:700;font-size:12px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${i+1}</div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;">${s}</div>
+            </div>`).join('')}
+        </div>
 
-    try {
-      const { subscribeToPush, saveReminderToFirestore } = await import('./push-subscribe.js');
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;margin-bottom:8px;">💡 Miért érdemes telepíteni?</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;">
+            ✅ Gyorsabb indítás<br>
+            ✅ Teljes képernyős megjelenés<br>
+            ✅ Offline hozzáférés<br>
+            ✅ Nincs böngésző sáv – tiszta, app-szerű élmény
+          </div>
+        </div>
 
-      if (enabled) {
-        setStatus('Push feliratkozás folyamatban...');
-        await subscribeToPush(fb.auth, fb.db);
-        setStatus('Beállítás mentése...');
-        await saveReminderToFirestore(fb.db, uid, { enabled: true, hour, minute });
-        showToast(`✅ Emlékeztető beállítva: ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`);
-      } else {
-        await saveReminderToFirestore(fb.db, uid, { enabled: false, hour, minute });
-        showToast('Emlékeztető kikapcsolva.');
-      }
-      modal.remove();
-    } catch(e) {
-      setStatus('⚠️ ' + e.message, 'var(--red)');
-      saveBtn.disabled = false;
-      saveBtn.textContent = '💾 Mentés';
-    }
-  });
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('#install-close').onclick = () => modal.remove();
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
 }
