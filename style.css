@@ -285,7 +285,7 @@ body {
   cursor: pointer; padding: 4px 0;
   transition: color 0.2s;
 }
-.nav-btn.active { color: var(--accent); }
+.nav-btn.active { color: #000; }
 .nav-btn:hover { color: var(--text-primary); }
 .nav-btn.active svg { stroke: var(--accent); }
 .nav-btn-center { margin-top: -20px; }
