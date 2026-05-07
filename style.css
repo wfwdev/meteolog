@@ -288,6 +288,7 @@ body {
 .nav-btn.active { color: var(--accent); }
 .nav-btn:hover { color: var(--text-primary); }
 .nav-btn.active svg { stroke: var(--accent); }
+.nav-btn-center.active svg, .nav-btn-center svg { stroke: #000 !important; }
 .nav-btn-center { margin-top: -20px; }
 .nav-fab {
   width: 52px; height: 52px;
@@ -299,6 +300,13 @@ body {
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   z-index: 10;
+  overflow: visible;
+}
+.nav-fab svg {
+  display: block;
+  flex-shrink: 0;
+  stroke: #000;
+  pointer-events: none;
 }
 .nav-fab:hover, .nav-btn-center:hover .nav-fab { transform: scale(1.08); box-shadow: 0 0 28px var(--accent-glow); }
 .nav-btn-center span { color: var(--text-muted); }
