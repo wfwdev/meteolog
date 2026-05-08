@@ -41,6 +41,31 @@
   --radius-sm: 8px;
 }
 
+/* ── Világos téma ───────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-primary:    #f0f4f8;
+  --bg-secondary:  #ffffff;
+  --bg-card:       #ffffff;
+  --bg-card-hover: #f5f8fc;
+  --bg-input:      #eef2f7;
+  --border:        #d0dcea;
+  --border-light:  #b8cfe0;
+
+  --accent:        #00a87a;
+  --accent-dim:    rgba(0, 168, 122, 0.12);
+  --accent-glow:   rgba(0, 168, 122, 0.3);
+  --amber:         #d97706;
+  --amber-dim:     rgba(217, 119, 6, 0.12);
+  --blue:          #2563eb;
+  --blue-dim:      rgba(37, 99, 235, 0.12);
+  --red:           #dc2626;
+  --red-dim:       rgba(220, 38, 38, 0.12);
+
+  --text-primary:   #1a2b3c;
+  --text-secondary: #4a6480;
+  --text-muted:     #8aaabb;
+}
+
 /* ── Reset ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {

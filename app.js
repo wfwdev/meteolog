@@ -67,6 +67,7 @@ if (window.__firebase) {
 }
 
 function boot() {
+  initTheme();
   try {
     onUserChange(user => {
       if (user) {
@@ -304,6 +305,7 @@ function showAccountMenu() {
     <div class="ap-name">${name}</div>
     <div class="ap-sub">${guest ? '👤 Vendég fiók' : '✉️ Regisztrált felhasználó'}</div>
     ${guest ? `<button class="ap-btn" id="ap-register">📧 Regisztráció</button>` : ''}
+    <button class="ap-btn" id="ap-theme">${localStorage.getItem('meteolog_theme')==='light' ? '🌙 Sötét téma' : '☀️ Világos téma'}</button>
     <button class="ap-btn" id="ap-feedback">⭐ Értékelés / visszajelzés</button>
     <button class="ap-btn" id="ap-share">📣 App megosztása</button>
     <button class="ap-btn" id="ap-about">ℹ️ Az appról</button>
@@ -316,6 +318,11 @@ function showAccountMenu() {
   popup.querySelector('#ap-logout')?.addEventListener('click', async () => {
     popup.remove();
     await logout();
+  });
+
+  popup.querySelector('#ap-theme')?.addEventListener('click', () => {
+    popup.remove();
+    toggleTheme();
   });
 
   popup.querySelector('#ap-feedback')?.addEventListener('click', () => {
@@ -548,4 +555,28 @@ function shareApp() {
     navigator.clipboard.writeText(url);
     showToast('🔗 Link vágólapra másolva!');
   }
+}
+
+// ── Téma váltó ────────────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('meteolog_theme') || 'dark';
+  applyTheme(saved);
+}
+
+function applyTheme(theme) {
+  if (theme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  localStorage.setItem('meteolog_theme', theme);
+  // Meta theme-color frissítése
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = theme === 'light' ? '#ffffff' : '#060d1a';
+}
+
+function toggleTheme() {
+  const current = localStorage.getItem('meteolog_theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+  showToast(current === 'dark' ? '☀️ Világos téma' : '🌙 Sötét téma');
 }
