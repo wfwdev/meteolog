@@ -485,9 +485,9 @@ function showInstallModal() {
 // ── Az appról modal ───────────────────────────────────────────
 function showAboutModal() {
   const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px;';
   modal.innerHTML = `
-    <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);width:100%;max-width:400px;overflow:hidden;">
+    <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);width:100%;max-width:400px;overflow:hidden;margin:auto;">
 
       <!-- Header -->
       <div style="background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:10px;">
