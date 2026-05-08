@@ -304,6 +304,7 @@ function showAccountMenu() {
     <div class="ap-name">${name}</div>
     <div class="ap-sub">${guest ? '👤 Vendég fiók' : '✉️ Regisztrált felhasználó'}</div>
     ${guest ? `<button class="ap-btn" id="ap-register">📧 Regisztráció</button>` : ''}
+    <button class="ap-btn" id="ap-share">📣 App megosztása</button>
     <button class="ap-btn" id="ap-about">ℹ️ Az appról</button>
     <button class="ap-btn" id="ap-help">📖 Használati útmutató</button>
     <button class="ap-btn" id="ap-install">📱 Telepítési útmutató</button>
@@ -314,6 +315,11 @@ function showAccountMenu() {
   popup.querySelector('#ap-logout')?.addEventListener('click', async () => {
     popup.remove();
     await logout();
+  });
+
+  popup.querySelector('#ap-share')?.addEventListener('click', () => {
+    popup.remove();
+    shareApp();
   });
 
   popup.querySelector('#ap-about')?.addEventListener('click', () => {
@@ -522,4 +528,18 @@ function showAboutModal() {
   document.body.appendChild(modal);
   modal.querySelector('#about-close').onclick = () => modal.remove();
   modal.onclick = e => { if (e.target === modal) modal.remove(); };
+}
+
+// ── App megosztás ─────────────────────────────────────────────
+function shareApp() {
+  const url   = 'https://gaben8808.github.io/meteolog';
+  const title = 'MeteoLog – Személyes időjárás napló';
+  const text  = 'Rögzítsd és kövesd a saját időjárási adataidat! Ingyenes PWA app – nem kell telepíteni.';
+
+  if (navigator.share) {
+    navigator.share({ title, text, url });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url);
+    showToast('🔗 Link vágólapra másolva!');
+  }
 }
