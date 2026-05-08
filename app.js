@@ -304,6 +304,7 @@ function showAccountMenu() {
     <div class="ap-name">${name}</div>
     <div class="ap-sub">${guest ? '👤 Vendég fiók' : '✉️ Regisztrált felhasználó'}</div>
     ${guest ? `<button class="ap-btn" id="ap-register">📧 Regisztráció</button>` : ''}
+    <button class="ap-btn" id="ap-feedback">⭐ Értékelés / visszajelzés</button>
     <button class="ap-btn" id="ap-share">📣 App megosztása</button>
     <button class="ap-btn" id="ap-about">ℹ️ Az appról</button>
     <button class="ap-btn" id="ap-help">📖 Használati útmutató</button>
@@ -315,6 +316,11 @@ function showAccountMenu() {
   popup.querySelector('#ap-logout')?.addEventListener('click', async () => {
     popup.remove();
     await logout();
+  });
+
+  popup.querySelector('#ap-feedback')?.addEventListener('click', () => {
+    popup.remove();
+    window.open('https://github.com/gaben8808/meteolog/issues/new', '_blank');
   });
 
   popup.querySelector('#ap-share')?.addEventListener('click', () => {
