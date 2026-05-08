@@ -50,7 +50,7 @@ self.addEventListener('notificationclick', e => {
 });
 
 // ── Cache ─────────────────────────────────────────────────────
-const CACHE = 'meteolog-v30';
+const CACHE = 'meteolog-v31';
 const CORE  = ['./index.html', './style.css', './manifest.json', './chart.min.js'];
 
 self.addEventListener('install', e => {

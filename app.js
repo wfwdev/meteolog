@@ -304,6 +304,7 @@ function showAccountMenu() {
     <div class="ap-name">${name}</div>
     <div class="ap-sub">${guest ? '👤 Vendég fiók' : '✉️ Regisztrált felhasználó'}</div>
     ${guest ? `<button class="ap-btn" id="ap-register">📧 Regisztráció</button>` : ''}
+    <button class="ap-btn" id="ap-about">ℹ️ Az appról</button>
     <button class="ap-btn" id="ap-help">📖 Használati útmutató</button>
     <button class="ap-btn" id="ap-install">📱 Telepítési útmutató</button>
     <button class="ap-btn" id="ap-logout" style="color:var(--red);">🚪 Kijelentkezés</button>`;
@@ -313,6 +314,11 @@ function showAccountMenu() {
   popup.querySelector('#ap-logout')?.addEventListener('click', async () => {
     popup.remove();
     await logout();
+  });
+
+  popup.querySelector('#ap-about')?.addEventListener('click', () => {
+    popup.remove();
+    showAboutModal();
   });
 
   popup.querySelector('#ap-help')?.addEventListener('click', () => {
@@ -454,5 +460,66 @@ function showInstallModal() {
     </div>`;
   document.body.appendChild(modal);
   modal.querySelector('#install-close').onclick = () => modal.remove();
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+}
+
+// ── Az appról modal ───────────────────────────────────────────
+function showAboutModal() {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.innerHTML = `
+    <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);width:100%;max-width:400px;overflow:hidden;">
+
+      <!-- Header -->
+      <div style="background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;">🌤️</span>
+        <span style="font-family:var(--font-display);font-weight:700;font-size:18px;">Az appról</span>
+        <button id="about-close" style="margin-left:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;color:var(--text-secondary);cursor:pointer;font-size:14px;">✕</button>
+      </div>
+
+      <!-- Logo szekció -->
+      <div style="padding:28px 24px 20px;text-align:center;border-bottom:1px solid var(--border);">
+        <div style="font-size:56px;margin-bottom:10px;">🌤️</div>
+        <div style="font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--accent);letter-spacing:-0.5px;">MeteoLog</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:6px;font-family:var(--font-mono);">v1.0.0</div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.5;">Személyes időjárás dokumentáló rendszer</div>
+      </div>
+
+      <!-- Fejlesztő -->
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">👨‍💻 Fejlesztő</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:12px;">Kovács Gábor</div>
+        <a href="mailto:info@wfw.hu" style="display:flex;align-items:center;gap:10px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;text-decoration:none;color:var(--text-primary);margin-bottom:8px;transition:border-color 0.2s;">
+          <span style="font-size:16px;">✉️</span>
+          <span style="font-size:13px;">info@wfw.hu</span>
+        </a>
+        <a href="https://wfw.hu" target="_blank" style="display:flex;align-items:center;gap:10px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;text-decoration:none;color:var(--text-primary);transition:border-color 0.2s;">
+          <span style="font-size:16px;">🌐</span>
+          <span style="font-size:13px;">wfw.hu</span>
+        </a>
+      </div>
+
+      <!-- Technológiák -->
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">⚙️ Technológiák</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${['PWA','Firebase','Firestore','Open-Meteo','Chart.js','Vanilla JS'].map(t =>
+            `<span style="background:var(--bg-input);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text-secondary);font-family:var(--font-mono);">${t}</span>`
+          ).join('')}
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:16px 24px;text-align:center;">
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
+          © 2026 Kovács Gábor · Minden jog fenntartva<br>
+          <span style="color:var(--accent);">Ingyenes, nyílt forráskódú projekt</span>
+        </div>
+      </div>
+
+    </div>`;
+
+  document.body.appendChild(modal);
+  modal.querySelector('#about-close').onclick = () => modal.remove();
   modal.onclick = e => { if (e.target === modal) modal.remove(); };
 }
