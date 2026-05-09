@@ -308,6 +308,7 @@ function showAccountMenu() {
     <button class="ap-btn" id="ap-theme">${localStorage.getItem('meteolog_theme')==='light' ? '🌙 Sötét téma' : '☀️ Világos téma'}</button>
     <button class="ap-btn" id="ap-feedback">⭐ Értékelés / visszajelzés</button>
     <button class="ap-btn" id="ap-share">📣 App megosztása</button>
+    <button class="ap-btn" id="ap-privacy">🔒 Adatvédelmi nyilatkozat</button>
     <button class="ap-btn" id="ap-about">ℹ️ Az appról</button>
     <button class="ap-btn" id="ap-help">📖 Használati útmutató</button>
     <button class="ap-btn" id="ap-install">📱 Telepítési útmutató</button>
@@ -333,6 +334,11 @@ function showAccountMenu() {
   popup.querySelector('#ap-share')?.addEventListener('click', () => {
     popup.remove();
     shareApp();
+  });
+
+  popup.querySelector('#ap-privacy')?.addEventListener('click', () => {
+    popup.remove();
+    showPrivacyModal();
   });
 
   popup.querySelector('#ap-about')?.addEventListener('click', () => {
@@ -579,4 +585,74 @@ function toggleTheme() {
   const current = localStorage.getItem('meteolog_theme') || 'dark';
   applyTheme(current === 'dark' ? 'light' : 'dark');
   showToast(current === 'dark' ? '☀️ Világos téma' : '🌙 Sötét téma');
+}
+
+
+// ── Adatvédelmi nyilatkozat modal ────────────────────────────
+function showPrivacyModal() {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);width:100%;max-width:480px;overflow:hidden;margin:auto;">
+      <div style="background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:1;">
+        <span style="font-size:22px;">🔒</span>
+        <span style="font-family:var(--font-display);font-weight:700;font-size:18px;">Adatvédelmi nyilatkozat</span>
+        <button id="privacy-close" style="margin-left:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;color:var(--text-secondary);cursor:pointer;font-size:14px;flex-shrink:0;">✕</button>
+      </div>
+      <div style="padding:20px;font-size:13px;color:var(--text-secondary);line-height:1.7;display:flex;flex-direction:column;gap:20px;">
+        <div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Utolsó frissítés</div><div style="color:var(--text-primary);">2026. január 1.</div></div>
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:8px;">1. Az adatkezelő</div>
+          <b style="color:var(--text-primary);">Kovács Gábor</b><br>E-mail: <a href="mailto:info@wfw.hu" style="color:var(--accent);">info@wfw.hu</a><br>Weboldal: <a href="https://wfw.hu" target="_blank" style="color:var(--accent);">wfw.hu</a><br>Ország: Magyarország
+        </div>
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:8px;">2. Milyen adatokat gyűjtünk?</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div>📧 <b style="color:var(--text-primary);">E-mail cím</b> – regisztráció esetén, azonosításhoz</div>
+            <div>🔑 <b style="color:var(--text-primary);">Google fiók azonosító</b> – Google belépés esetén</div>
+            <div>🌡️ <b style="color:var(--text-primary);">Időjárás adatok</b> – az általad rögzített mérések</div>
+            <div>📍 <b style="color:var(--text-primary);">GPS koordináta</b> – ha megadod (opcionális)</div>
+            <div>🌐 <b style="color:var(--text-primary);">IP cím / eszköz adatok</b> – Firebase, biztonsági célból</div>
+          </div>
+        </div>
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:8px;">3. Mire használjuk?</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div><span style="color:var(--accent);">✓</span> Az app működtetése és felhasználói fiók kezelése</div>
+            <div><span style="color:var(--accent);">✓</span> Időjárás bejegyzések tárolása és megjelenítése</div>
+            <div><span style="color:var(--accent);">✓</span> Nyilvános megosztás (csak ha te engedélyezed)</div>
+            <div><span style="color:var(--accent);">✓</span> Nem használjuk marketing vagy hirdetési célra</div>
+            <div><span style="color:var(--accent);">✓</span> Nem adjuk át harmadik félnek</div>
+          </div>
+        </div>
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:8px;">4. Adatfeldolgozók</div>
+          <b style="color:var(--text-primary);">Google Firebase</b> – adattárolás, EU szerver (Belgium)<br>
+          <a href="https://firebase.google.com/support/privacy" target="_blank" style="color:var(--accent);">Firebase adatvédelmi irányelvek →</a><br><br>
+          <b style="color:var(--text-primary);">Open-Meteo</b> – időjárás API, személyes adat nem kerül át<br>
+          <a href="https://open-meteo.com/en/terms" target="_blank" style="color:var(--accent);">Open-Meteo feltételek →</a>
+        </div>
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:8px;">5. A te jogaid (GDPR)</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div><b style="color:var(--text-primary);">Hozzáférés:</b> kérheted milyen adatot tárolunk</div>
+            <div><b style="color:var(--text-primary);">Törlés:</b> kérheted az összes adatod törlését</div>
+            <div><b style="color:var(--text-primary);">Export:</b> CSV letöltéssel hordozhatod az adataid</div>
+            <div><b style="color:var(--text-primary);">Tiltakozás:</b> tiltakozhatsz az adatkezelés ellen</div>
+          </div>
+          <div style="margin-top:10px;">Kérelmek: <a href="mailto:info@wfw.hu" style="color:var(--accent);">info@wfw.hu</a></div>
+          <div style="margin-top:6px;font-size:12px;">Panasz esetén: <a href="https://naih.hu" target="_blank" style="color:var(--accent);">NAIH – naih.hu</a></div>
+        </div>
+        <div style="background:var(--bg-input);border-radius:var(--radius);padding:14px;">
+          <div style="font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:8px;">6. Sütik</div>
+          Az app nem használ nyomkövető sütiket. A Firebase Authentication a belépési tokent a böngésző helyi tárhelyén tárolja.
+        </div>
+        <div style="text-align:center;padding-bottom:8px;font-size:12px;color:var(--text-muted);">
+          © 2026 Kovács Gábor · MeteoLog<br>Jogalap: GDPR 6. cikk (1) b) pont
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('#privacy-close').onclick = () => modal.remove();
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
 }
