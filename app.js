@@ -13,6 +13,31 @@ import { showToast }       from './utils.js';
 import { AppState, setActiveLocation } from './state.js';
 import { showHelpModal, showInstallModal, showAboutModal, shareApp, initTheme, toggleTheme, showPrivacyModal, showDeleteAccountModal } from './ui-modals.js';
 
+// ── Offline állapot figyelés ─────────────────────────────────
+function initOfflineDetection() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+
+  const update = () => {
+    banner.style.display = navigator.onLine ? 'none' : 'block';
+    // Header padding igazítása ha a banner látható
+    const header = document.getElementById('app-header');
+    if (header) {
+      header.style.marginTop = navigator.onLine ? '0' : '32px';
+    }
+  };
+
+  window.addEventListener('online',  () => {
+    update();
+    window.__showToast('✅ Kapcsolat helyreállt – adatok szinkronizálva!');
+  });
+  window.addEventListener('offline', () => {
+    update();
+    window.__showToast('📡 Offline mód – rögzítés később szinkronizál');
+  });
+  update(); // kezdeti állapot
+}
+
 // ── Window globálok (import-mentes view fájlok számára) ───────
 window.__appState = AppState;
 window.__navigate = (view) => navigate(view);
@@ -69,6 +94,7 @@ if (window.__firebase) {
 
 function boot() {
   initTheme();
+  initOfflineDetection();
   try {
     onUserChange(user => {
       if (user) {
