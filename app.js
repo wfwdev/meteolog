@@ -1,7 +1,7 @@
 // ============================================================
 // MeteoLog – App (Router & Init)
 // ============================================================
-import { initAuth, loginEmail, registerEmail, loginAnonymous, logout, onUserChange, currentUser, getUserDisplayName, isGuest } from './auth.js';
+import { initAuth, loginEmail, registerEmail, loginAnonymous, logout, onUserChange, currentUser, getUserDisplayName, isGuest, resetPassword } from './auth.js';
 import { signInWithGoogle, signInWithFacebook, socialAuthErrorMsg } from './auth-providers.js';
 import { initDB, getLocations } from './db.js';
 import { renderDashboard } from './dashboard.js';
@@ -144,6 +144,32 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('auth-login').classList.toggle('hidden', tab !== 'login');
       document.getElementById('auth-register').classList.toggle('hidden', tab !== 'register');
     });
+  });
+
+  document.getElementById('btn-forgot')?.addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const err   = document.getElementById('auth-error');
+    err.classList.add('hidden');
+
+    if (!email) {
+      err.textContent = 'Add meg az e-mail címed a jelszó visszaállításhoz.';
+      err.classList.remove('hidden');
+      return;
+    }
+    try {
+      await resetPassword(email);
+      err.style.background = 'rgba(0,229,176,0.1)';
+      err.style.borderColor = 'var(--accent)';
+      err.style.color = 'var(--accent)';
+      err.textContent = '✅ Jelszó-visszaállító e-mail elküldve! Nézd meg a postaládádat.';
+      err.classList.remove('hidden');
+    } catch(e) {
+      err.style.background = '';
+      err.style.borderColor = '';
+      err.style.color = '';
+      err.textContent = authErrorMsg(e.code);
+      err.classList.remove('hidden');
+    }
   });
 
   document.getElementById('btn-login')?.addEventListener('click', async () => {

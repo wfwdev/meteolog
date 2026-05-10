@@ -7,7 +7,8 @@ import {
   signInAnonymously,
   signOut,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { initProviders, handleRedirectResult } from './auth-providers.js';
 
@@ -56,4 +57,11 @@ export function getUserDisplayName() {
   if (!currentUser) return 'Vendég';
   if (currentUser.isAnonymous) return 'Vendég';
   return currentUser.displayName || currentUser.email?.split('@')[0] || 'Felhasználó';
+}
+
+export async function resetPassword(email) {
+  return sendPasswordResetEmail(auth, email, {
+    url: window.location.origin + window.location.pathname,
+    handleCodeInApp: false
+  });
 }
