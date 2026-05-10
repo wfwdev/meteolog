@@ -88,48 +88,41 @@ export async function renderDashboard(container) {
 
 function renderHero(el, reading) {
   if (!reading) {
-    el.innerHTML = `
-      <div class="dash-hero">
-        <div class="dash-no-data">
-          <div class="dash-no-data-icon">🌡️</div>
-          <p>Még nincs bejegyzés ezen a helyszínen.<br>Nyomj a + gombra az első rögzítéséhez!</p>
-        </div>
-      </div>`;
+    el.innerHTML = '<div class="dash-hero"><div class="dash-no-data"><div class="dash-no-data-icon">🌡️</div><p>Még nincs bejegyzés ezen a helyszínen.<br>Nyomj a + gombra az első rögzítéséhez!</p></div></div>';
     return;
   }
-  const wt = getWeatherType(reading.weatherType);
-  el.innerHTML = `
-    <div class="dash-hero">
-      <div class="dash-hero-top">
-        <div>
-          <div class="dash-weather-label">${wt.label}</div>
-          <div class="dash-time">${formatDate(reading.timestamp)} · ${formatTime(reading.timestamp)}</div>
-        </div>
-        <div class="dash-weather-emoji">${wt.emoji}</div>
-      </div>
-      ${reading.temp != null
-        ? `<div class="dash-temp-big">${reading.temp}<span class="unit">°C</span></div>`
-        : '<div class="dash-temp-big" style="font-size:36px;color:var(--text-secondary)">–</div>'}
-      <div class="dash-details">
-        <div class="dash-detail-item">
-          <div class="dash-detail-label">💧 Páratar.</div>
-          <div class="dash-detail-value">${reading.humidity != null ? reading.humidity + '%' : '–'}</div>
-        </div>
-        <div class="dash-detail-item">
-          <div class="dash-detail-label">🌬️ Szél</div>
-          <div class="dash-detail-value">${reading.wind?.speed != null ? reading.wind.speed + ' km/h' : '–'}</div>
-        </div>
-        <div class="dash-detail-item">
-          <div class="dash-detail-label">📊 Nyomás</div>
-          <div class="dash-detail-value">${reading.pressure != null ? reading.pressure + ' hPa' : '–'}</div>
-        </div>
-      </div>
-      ${reading.precipitation?.observed ? `
-        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;color:var(--accent);">
-          🌧️ Csapadék: ${reading.precipitation.amount ?? 0} mm
-        </div>` : ''}
-      ${reading.notes ? `<div style="margin-top:8px;font-size:13px;color:var(--text-secondary);font-style:italic;">"${reading.notes}"</div>` : ''}
-    </div>`;
+  const wt   = getWeatherType(reading.weatherType);
+  const temp = reading.temp != null
+    ? '<div class="dash-temp-big">' + reading.temp + '<span class="unit">°C</span></div>'
+    : '<div class="dash-temp-big" style="font-size:36px;color:var(--text-secondary)">–</div>';
+  const hum  = reading.humidity  != null ? reading.humidity  + '%'    : '–';
+  const wind = reading.wind?.speed != null ? reading.wind.speed + ' km/h' : '–';
+  const pres = reading.pressure   != null ? reading.pressure + ' hPa' : '–';
+  const precip = reading.precipitation?.observed
+    ? '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;color:var(--accent);">🌧️ Csapadék: ' + (reading.precipitation.amount ?? 0) + ' mm</div>'
+    : '';
+  const notes = reading.notes
+    ? '<div style="margin-top:8px;font-size:13px;color:var(--text-secondary);font-style:italic;">"' + reading.notes + '"</div>'
+    : '';
+
+  el.innerHTML =
+    '<div class="dash-hero">' +
+      '<div class="dash-hero-top">' +
+        '<div>' +
+          '<div class="dash-weather-label">' + wt.label + '</div>' +
+          '<div class="dash-time">' + formatDate(reading.timestamp) + ' · ' + formatTime(reading.timestamp) + '</div>' +
+        '</div>' +
+        '<div class="dash-weather-emoji">' + wt.emoji + '</div>' +
+      '</div>' +
+      temp +
+      '<div class="dash-details">' +
+        '<div class="dash-detail-item"><div class="dash-detail-label">💧 Páratar.</div><div class="dash-detail-value">' + hum + '</div></div>' +
+        '<div class="dash-detail-item"><div class="dash-detail-label">🌬️ Szél</div><div class="dash-detail-value">' + wind + '</div></div>' +
+        '<div class="dash-detail-item"><div class="dash-detail-label">📊 Nyomás</div><div class="dash-detail-value">' + pres + '</div></div>' +
+      '</div>' +
+      precip +
+      notes +
+    '</div>';
 }
 
 function renderRecent(el, readings) {

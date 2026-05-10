@@ -50,7 +50,7 @@ self.addEventListener('notificationclick', e => {
 });
 
 // ── Cache ─────────────────────────────────────────────────────
-const CACHE = 'meteolog-v38';
+const CACHE = 'meteolog-v39';
 const CORE  = ['./index.html', './style.css', './manifest.json', './chart.min.js'];
 
 self.addEventListener('install', e => {
@@ -64,7 +64,8 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.map(k => caches.delete(k)))) // mindent töröl
+      .then(() => caches.open(CACHE)) // új cache létrehozása
       .then(() => self.clients.claim())
   );
 });
