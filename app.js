@@ -338,35 +338,115 @@ function showAccountMenu() {
 
   const popup = document.createElement('div');
   popup.className = 'account-popup';
-  const name = getUserDisplayName();
+  const name  = getUserDisplayName();
   const guest = isGuest();
+  const isDark = localStorage.getItem('meteolog_theme') !== 'light';
 
   popup.innerHTML = `
     <style>
     .account-popup {
-      position: fixed; top: calc(var(--header-h) + 8px); right: 12px;
-      background: var(--bg-card); border: 1px solid var(--border-light);
-      border-radius: var(--radius); padding: 16px; min-width: 200px; z-index: 300;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      position: fixed;
+      top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 8px);
+      right: 12px; left: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      z-index: 300;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
       animation: slide-down 0.2s ease;
+      overflow: hidden;
     }
-    .ap-name { font-weight: 600; margin-bottom: 4px; }
-    .ap-sub  { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
-    .ap-btn  { display: block; width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer; text-align: left; margin-bottom: 8px; transition: background 0.15s; }
-    .ap-btn:hover { background: var(--bg-card-hover); }
+    .ap-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px; border-bottom: 1px solid var(--border);
+      background: var(--bg-secondary);
+    }
+    .ap-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--accent-dim); border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .ap-name  { font-weight: 600; font-size: 15px; }
+    .ap-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .ap-group { padding: 8px; border-bottom: 1px solid var(--border); }
+    .ap-group:last-child { border-bottom: none; }
+    .ap-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 8px; border-radius: var(--radius-sm);
+      color: var(--text-primary); font-size: 14px;
+      cursor: pointer; transition: background 0.15s;
+      background: none; border: none; width: 100%; text-align: left;
+      font-family: var(--font-body);
+    }
+    .ap-row:hover { background: var(--bg-input); }
+    .ap-row-icon { font-size: 17px; width: 24px; text-align: center; flex-shrink: 0; }
+    .ap-row-label { flex: 1; }
+    .ap-row-badge {
+      font-size: 11px; background: var(--accent-dim); color: var(--accent);
+      padding: 2px 8px; border-radius: 10px; font-weight: 600;
+    }
+    .ap-danger { color: var(--red) !important; }
     </style>
-    <div class="ap-name">${name}</div>
-    <div class="ap-sub">${guest ? '👤 Vendég fiók' : '✉️ Regisztrált felhasználó'}</div>
-    ${guest ? `<button class="ap-btn" id="ap-register">📧 Regisztráció</button>` : ''}
-    <button class="ap-btn" id="ap-theme">${localStorage.getItem('meteolog_theme')==='light' ? '🌙 Sötét téma' : '☀️ Világos téma'}</button>
-    <button class="ap-btn" id="ap-feedback">⭐ Értékelés / visszajelzés</button>
-    <button class="ap-btn" id="ap-share">📣 App megosztása</button>
-    <button class="ap-btn" id="ap-delete-account" style="color:var(--red);">🗑️ Fiók törlése</button>
-    <button class="ap-btn" id="ap-privacy">🔒 Adatvédelmi nyilatkozat</button>
-    <button class="ap-btn" id="ap-about">ℹ️ Az appról</button>
-    <button class="ap-btn" id="ap-help">📖 Használati útmutató</button>
-    <button class="ap-btn" id="ap-install">📱 Telepítési útmutató</button>
-    <button class="ap-btn" id="ap-logout" style="color:var(--red);">🚪 Kijelentkezés</button>`;
+
+    <!-- Fejléc -->
+    <div class="ap-header">
+      <div class="ap-avatar">${guest ? '👤' : '🌤️'}</div>
+      <div>
+        <div class="ap-name">${name}</div>
+        <div class="ap-sub">${guest ? 'Vendég fiók' : 'Regisztrált felhasználó'}</div>
+      </div>
+    </div>
+
+    <!-- Csoport 1: Gyors műveletek -->
+    <div class="ap-group">
+      ${guest ? '<button class="ap-row" id="ap-register"><span class="ap-row-icon">📧</span><span class="ap-row-label">Regisztráció</span><span class="ap-row-badge">Új</span></button>' : ''}
+      <button class="ap-row" id="ap-theme">
+        <span class="ap-row-icon">${isDark ? '☀️' : '🌙'}</span>
+        <span class="ap-row-label">${isDark ? 'Világos téma' : 'Sötét téma'}</span>
+      </button>
+      <button class="ap-row" id="ap-share">
+        <span class="ap-row-icon">📣</span>
+        <span class="ap-row-label">App megosztása</span>
+      </button>
+    </div>
+
+    <!-- Csoport 2: Segítség -->
+    <div class="ap-group">
+      <button class="ap-row" id="ap-help">
+        <span class="ap-row-icon">📖</span>
+        <span class="ap-row-label">Használati útmutató</span>
+      </button>
+      <button class="ap-row" id="ap-install">
+        <span class="ap-row-icon">📱</span>
+        <span class="ap-row-label">Telepítési útmutató</span>
+      </button>
+      <button class="ap-row" id="ap-feedback">
+        <span class="ap-row-icon">⭐</span>
+        <span class="ap-row-label">Visszajelzés küldése</span>
+      </button>
+    </div>
+
+    <!-- Csoport 3: Infó -->
+    <div class="ap-group">
+      <button class="ap-row" id="ap-about">
+        <span class="ap-row-icon">ℹ️</span>
+        <span class="ap-row-label">Az appról</span>
+      </button>
+      <button class="ap-row" id="ap-privacy">
+        <span class="ap-row-icon">🔒</span>
+        <span class="ap-row-label">Adatvédelmi nyilatkozat</span>
+      </button>
+    </div>
+
+    <!-- Csoport 4: Fiók -->
+    <div class="ap-group">
+      ${!guest ? '<button class="ap-row ap-danger" id="ap-delete-account"><span class="ap-row-icon">🗑️</span><span class="ap-row-label">Fiók törlése</span></button>' : ''}
+      <button class="ap-row ap-danger" id="ap-logout">
+        <span class="ap-row-icon">🚪</span>
+        <span class="ap-row-label">Kijelentkezés</span>
+      </button>
+    </div>`;
 
   document.body.appendChild(popup);
 
