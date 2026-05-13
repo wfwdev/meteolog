@@ -185,7 +185,7 @@ export function showAboutModal() {
 
 // ── App megosztás ─────────────────────────────────────────────
 export function shareApp() {
-  const url   = 'https://gaben8808.github.io/meteolog';
+  const url   = 'https://wfwdev.github.io/meteolog';
   const title = 'MeteoLog – Személyes időjárás napló';
   const text  = 'Rögzítsd és kövesd a saját időjárási adataidat! Ingyenes PWA app – nem kell telepíteni.';
 
