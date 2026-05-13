@@ -2,7 +2,7 @@
 // MeteoLog – App (Router & Init)
 // ============================================================
 import { initAuth, loginEmail, registerEmail, loginAnonymous, logout, onUserChange, currentUser, getUserDisplayName, isGuest, resetPassword } from './auth.js';
-import { signInWithGoogle, signInWithFacebook, socialAuthErrorMsg } from './auth-providers.js';
+import { signInWithGoogle, socialAuthErrorMsg } from './auth-providers.js';
 import { initDB, getLocations } from './db.js';
 import { renderDashboard } from './dashboard.js';
 import { renderLog }       from './log.js';
@@ -224,8 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-google')?.addEventListener('click', () =>
     handleSocialLogin(signInWithGoogle));
 
-  document.getElementById('btn-facebook')?.addEventListener('click', () =>
-    handleSocialLogin(signInWithFacebook));
 
 
   // Header auth button
@@ -462,7 +460,7 @@ function showAccountMenu() {
 
   popup.querySelector('#ap-feedback')?.addEventListener('click', () => {
     popup.remove();
-    window.open('https://github.com/gaben8808/meteolog/issues/new', '_blank');
+    window.open('https://github.com/wfwdev/meteolog/issues/new', '_blank');
   });
 
   popup.querySelector('#ap-share')?.addEventListener('click', () => {
@@ -508,4 +506,3 @@ function showAccountMenu() {
     }
   }), 50);
 }
-
